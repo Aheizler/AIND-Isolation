@@ -398,6 +398,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             # The try/except block will automatically catch the exception raised by
             # the search method when the timer is near to expiring.
 
+            
             depth = 1
             while time_left() > self.TIMER_THRESHOLD:
                 best_move = self.alphabeta(game, depth)
@@ -410,8 +411,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             return (-1, -1)
             
         
-     
-
+    
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
         """Implement depth-limited minimax search with alpha-beta pruning as
         described in the lectures.
@@ -466,8 +466,6 @@ class AlphaBetaPlayer(IsolationPlayer):
         if not legal_moves:
             return game.utility(self), (-1, -1)
         
-        #val, move = min((self.maxVal(game, move, depth, alpha, beta), move) for move in legal_moves)
-        #return move
 
         def maxVal(self, game, depth, alpha, beta):
             if self.time_left() < self.TIMER_THRESHOLD:
@@ -508,7 +506,7 @@ class AlphaBetaPlayer(IsolationPlayer):
                 if val <= alpha:
                    return val
                 beta = min(beta, val)
-            return val
+            return val 
         
         best_move = (-1, -1)
         best_val = float("-inf")
@@ -520,7 +518,7 @@ class AlphaBetaPlayer(IsolationPlayer):
             if val > best_val:
                 best_val, best_move = val, move
                 if best_val >= beta:
-                    return best_val
+                    return best_move
                 alpha = max(alpha, val)
         return best_move
             

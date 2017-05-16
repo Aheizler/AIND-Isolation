@@ -228,6 +228,14 @@ class MinimaxPlayer(IsolationPlayer):
         # in case the search fails due to timeout
         best_move = (-1, -1)
         
+        legal_moves = game.get_legal_moves()
+        
+        if game.move_count == 0:
+            return(int(game.height/2), int(game.width/2))
+        
+        if game.move_count == 1:
+            move = legal_moves[random.randint(0, len(legal_moves) - 1)]
+            return move
         
         try:
             # The try/except block will automatically catch the exception
@@ -343,7 +351,7 @@ class AlphaBetaPlayer(IsolationPlayer):
     search with alpha-beta pruning. You must finish and test this player to
     make sure it returns a good move before the search time limit expires.
     """
-
+    
     def get_move(self, game, time_left):
         """Search for the best move from the available legal moves and return a
         result before the time limit expires.
@@ -378,8 +386,12 @@ class AlphaBetaPlayer(IsolationPlayer):
         
         legal_moves = game.get_legal_moves()
         
-        if not legal_moves:
+        if len(legal_moves) == 0:
             return (-1, -1)
+        
+        if game.move_count == 0:
+            random_move = legal_moves[random.randint(0, len(legal_moves) - 1)]
+            return random_move
         
         try:
             # The search method should happen in here in order to avoid SearchTimeout.
@@ -388,14 +400,15 @@ class AlphaBetaPlayer(IsolationPlayer):
 
             depth = 1
             while time_left() > self.TIMER_THRESHOLD:
-                best_move = self.alphabeta(game, depth, alpha=float("-inf"), beta=float("inf"))
+                best_move = self.alphabeta(game, depth)
                 depth += 1
             return best_move
                 
         except SearchTimeout:
             # Handle any actions required at timeout, if necessary
-            print("Search timed out")
-            return best_move
+            print("Search timed out at AlphaBetaPlayer.get_move")
+            return (-1, -1)
+            
         
      
 
@@ -448,66 +461,68 @@ class AlphaBetaPlayer(IsolationPlayer):
             raise SearchTimeout()
             print("Timed out at AlphaBetaPlayer.alphabeta")
         
-        if depth == 0:
-            return self.score(game, self), (-1, -1)
-        
-        
-        
-        # Determining whether there are any legal moves to play. If not, then player loses.
-        # Getting the legal moves for the active player.
         legal_moves = game.get_legal_moves()
             
         if not legal_moves:
-            return (-1, -1)
+            return game.utility(self), (-1, -1)
         
-        val, move = min((self.maxVal(game, move, depth, alpha, beta), move) for move in legal_moves)
-        return move
-        
-        
-      
-        
-    def maxVal(self, game, move, depth, alpha, beta):
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
-            print("Timed out at alphabeta maxVal")
-        
-        game_temp = game.forecast_move(move)
-        
-        legal_moves = game_temp.get_legal_moves()
-        
-        val = float("-inf")
+        #val, move = min((self.maxVal(game, move, depth, alpha, beta), move) for move in legal_moves)
+        #return move
+
+        def maxVal(self, game, depth, alpha, beta):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+                print("Timed out at alphabeta maxVal")
+  
+            if depth == 0:
+                return self.score(game, self)
             
-        if depth == 0:
-            return self.score(game_temp, self)
+            val = float("-inf")
+            
+            legal_moves = game.get_legal_moves()
+            
+            for move in legal_moves:
+                game_temp = game.forecast_move(move)
+                val = max(val, minVal(self, game_temp, depth - 1, alpha, beta))
+                if val >= beta:
+                    return val
+                alpha = max(alpha, val)
+            return val
+        
+        
+        def minVal(self, game, depth, alpha, beta):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+                print("Timed out at alphabeta minVal")
+              
+            if depth == 0:
+                return self.score(game, self)
+            
+            val = float("inf")
+            
+            legal_moves = game.get_legal_moves()
+            
+            for move in legal_moves:
+                game_temp = game.forecast_move(move)
+                val = min(val, maxVal(self, game_temp, depth - 1, alpha, beta))
+                if val <= alpha:
+                   return val
+                beta = min(beta, val)
+            return val
+        
+        best_move = (-1, -1)
+        best_val = float("-inf")
+        
         
         for move in legal_moves:
-            val = max(val, self.minVal(game_temp, move, depth - 1, alpha, beta))
-            if val >= beta:
-                return val
-            alpha = max(alpha, val)
-        return val
-    
-    
-    def minVal(self, game, move, depth, alpha, beta):
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
-            print("Timed out at alphabeta minVal")
-        
-        game_temp = game.forecast_move(move)
-        
-        legal_moves = game_temp.get_legal_moves()
-        
-        val = float("inf")
-            
-        if depth == 0:
-            return self.score(game_temp, self)
-        
-        for move in legal_moves:
-            val = min(val, self.maxVal(game_temp, move, depth - 1, alpha, beta))
-            if val <= alpha:
-               return val
-            beta = min(beta, val)
-        return val
+            game_temp = game.forecast_move(move)
+            val = minVal(self, game_temp, depth - 1, alpha, beta)
+            if val > best_val:
+                best_val, best_move = val, move
+                if best_val >= beta:
+                    return best_val
+                alpha = max(alpha, val)
+        return best_move
             
     
             

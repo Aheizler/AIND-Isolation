@@ -45,7 +45,7 @@ def custom_score(game, player):
     This calculates the sum of the absolute number of squares from the player's
     position to the center of the board along x and y axes.
     This puts a positive coefficient to the player's distance to the center,
-    effectively pusshing it towards the edges of the board.
+    effectively pushing it towards the edges of the board.
     """
     
     if game.is_loser(player):
@@ -97,9 +97,9 @@ def custom_score_2(game, player):
     """
     This function returns the difference between the number of legal moves the player has available
     and two times the number of legal moves available to the opponent.
-    If the returned value is positive, then the player has more than twice as many available legal moves
+    If the returned value is positive, then the player has more than three times as many available legal moves
     than the opponent.
-    If the returned value is negative, then the player has half as many available legal moves
+    If the returned value is negative, then the player has less than one-third as many available legal moves
     than the opponent.
     """
     
@@ -140,7 +140,7 @@ def custom_score_3(game, player):
     
     """
     Changes the factors applied to the player and opponent based upon the state of the game.
-    In the beginning of the game, where there are 30 or more blank spaces, more aggresiveness:
+    In the beginning of the game, where there are 25 or more blank spaces, more aggresiveness:
         own_moves - 3 * opp_moves
     Near the end of the game, be more defensive:
         3 * own_moves - opp_moves

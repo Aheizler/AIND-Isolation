@@ -14,8 +14,6 @@ def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
 
-    This should be the best heuristic function for your project submission.
-
     Note: this function should be called from within a Player instance as
     `self.score()` -- you should not need to call this function directly.
 
@@ -34,18 +32,16 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    
     """
-    This heuristic function is based on the number of legal moves available
-    and each player's distance to the center of the board.
-    
-    10* (own_moves - opp_moves) + (own_distance_x + own_distance_y) -
-    (opp_distance_x + opp_distance_y)
-    
-    This calculates the sum of the absolute number of squares from the player's
-    position to the center of the board along x and y axes.
-    This puts a positive coefficient to the player's distance to the center,
-    effectively pushing it towards the edges of the board.
+    This heuristic function evaluates the board state in a two-fold process.
+    First it calculates a score of the board state based on the amount of moves available
+    to the player vs two times the amount of available moves to the opponent, and if the player has
+    more than twice as many moves as the opponent, the player will have a positive score/advantage.
+    The heuristic function then normalizes the difference in moves with the manhattan distance
+    between each player using the manhattan distance method. If the manhattan distance between the
+    player and the opponent is large, the player will find it difficult to block the opponent,
+    therefore causing the board state to be penalized, else it will be rewarded. This is more of a 
+    defensive strategy.
     """
     
     if game.is_loser(player):
@@ -54,24 +50,19 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
     
-    center = game.width/2
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    move_difference = own_moves - (2 * opp_moves)
     
     own_position = game.get_player_location(player)
     opp_position = game.get_player_location(game.get_opponent(player))
     
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    manhattan_distance = abs(own_position[0] - opp_position[0]) + abs(own_position[1] - opp_position[1])
     
-    own_distance_x = abs(center - own_position[0])
-    own_distance_y = abs(center - own_position[1])
-    
-    opp_distance_x = abs(center - opp_position[0])
-    opp_distance_y = abs(center - opp_position[1])
-    
-    return float(10* (opp_moves - own_moves) + (own_distance_x + own_distance_y) -
-                 (opp_distance_x + opp_distance_y))
+    return (float(move_difference / float(manhattan_distance)))
 
-
+   
 def custom_score_2(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -95,12 +86,10 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     """
-    This function returns the difference between the number of legal moves the player has available
-    and two times the number of legal moves available to the opponent.
-    If the returned value is positive, then the player has more than three times as many available legal moves
-    than the opponent.
-    If the returned value is negative, then the player has less than one-third as many available legal moves
-    than the opponent.
+    This heuristic function evaluates the board state by using the difference 
+    between the amount of legal moves available to the player and two times 
+    the number of legal moves available to the opponent.
+    This is more of a defensive heuristic and gives an incentive to blocking.
     """
     
     if game.is_loser(player):
@@ -112,12 +101,14 @@ def custom_score_2(game, player):
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     
-    return float(opp_moves - 3 * own_moves)
+    return float(own_moves - (2 * opp_moves))
 
-
+ 
 def custom_score_3(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
+
+    This should be the best heuristic function for your project submission.
 
     Note: this function should be called from within a Player instance as
     `self.score()` -- you should not need to call this function directly.
@@ -139,12 +130,13 @@ def custom_score_3(game, player):
     """
     
     """
-    Changes the factors applied to the player and opponent based upon the state of the game.
-    In the beginning of the game, where there are 25 or more blank spaces, more aggresiveness:
-        own_moves - 3 * opp_moves
-    Near the end of the game, be more defensive:
-        3 * own_moves - opp_moves
-    
+    This heuristic function evaluates the board state by calculating the positional advantage of each player
+    with regards to the center of the board. Being in the center of the board typically allows for more available
+    legal moves.
+    If both players do not have the same amount of legal moves available, it returns the difference.
+    Else, if both players do have the same number of moves left, it searches for a positional advantage.
+    This can be done by using the Manhattan distance to the center of the board to evaluate the positional
+    advantage of each player.
     """
     
     if game.is_loser(player):
@@ -153,15 +145,36 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
     
-    blank_spaces = len(game.get_blank_spaces())
-    
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     
-    if blank_spaces > 25:
-        return float(own_moves - 3 * opp_moves)
+    if own_moves != opp_moves:
+        return float(own_moves - opp_moves)
+    
     else:
-        return float(3 * own_moves - opp_moves)
+        center_y, center_x = int(game.height / 2), int(game.width / 2)
+        
+        own_position = game.get_player_location(player)
+        opp_position = game.get_player_location(game.get_opponent(player))
+        
+        own_distance_y = abs(center_x - own_position[0])
+        own_distance_x = abs(center_y - own_position[1])
+        
+        opp_distance_y = abs(center_x - opp_position[0])
+        opp_distance_x = abs(center_y - opp_position[1])    
+        
+        
+        own_dist = abs(own_distance_x - center_x) + abs(own_distance_y - center_y)
+        opp_dist = abs(opp_distance_x - center_x) + abs(opp_distance_y - center_y)
+  
+         # Need to take the difference between the two distances to evaluate the positional advantage.
+         # Normalize this number to be -1 < distance < +1.
+         # Best case is opponent's distance is 6 from center (corner) and the player is at 0,0 (center): returns 0.6
+         # Worse case is opponent's distance is 0 from center (center) and the player is in a corner: returns -0.6
+         # If both players are the same distance from the center: returns 0
+         
+    return float(opp_dist - own_dist) / 10.
+
 
 
 class IsolationPlayer:
@@ -231,26 +244,26 @@ class MinimaxPlayer(IsolationPlayer):
 
         
         legal_moves = game.get_legal_moves()
-        if len(legal_moves) == 0:
-            return (-1, -1)
         
-
+        if len(legal_moves) == 0:
+            return self.score(game, self)
+        
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-        best_move = (-1, -1)
+        best_move = legal_moves[0]
         
         try:
             # The try/except block will automatically catch the exception
             # raised when the timer is about to expire.
-            
-            best_move = self.minimax(game, self.search_depth)
+            if self.time_left() > self.TIMER_THRESHOLD:
+                best_move = self.minimax(game, self.search_depth)
                             
         except SearchTimeout:
             #pass  # Handle any actions required after timeout as needed
-            
+
+            return best_move
+        
         # Return the best move from the last completed depth search iteration 
-            if (best_move == (-1, -1)):
-                best_move = legal_moves[random.randint(0, len(legal_moves) - 1)]
         return best_move
 
 
@@ -385,17 +398,15 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         self.time_left = time_left
         
-        best_move = (-1, -1)
-    
-        
         legal_moves = game.get_legal_moves()
-        
+    
         if len(legal_moves) == 0:
             return (-1, -1)
         
-        
+        best_move = legal_moves[0]
+
         try:
-            if self.time_left() > self.TIMER_THRESHOLD: 
+            if self.time_left() > self.TIMER_THRESHOLD:
                 depth = 1
                 while True:
                     best_move = self.alphabeta(game, depth)
@@ -403,10 +414,9 @@ class AlphaBetaPlayer(IsolationPlayer):
                 
         except SearchTimeout:
             # Handle any actions required at timeout, if necessary
-            #pass
-        
-            if (best_move == (-1, -1)):
-                best_move = legal_moves[random.randint(0, len(legal_moves) - 1)]
+            return best_move
+            
+        # Return the best move from the last completed search iteration
         return best_move
         
         # Alpha is the maximum lower bound of possible solutions
@@ -459,21 +469,18 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-            
-        if depth == 0:
-            return self.score(game, self)
-            
-
+        
         legal_moves = game.get_legal_moves()
         
-        if len(legal_moves) == 0:
-            return (-1, -1)
+        if len(legal_moves) == 0 or depth == 0:
+            return self.score(game, self)
         
         best_move = (-1, -1)
         best_val = float("-inf")
-                
+        
+        # Searching child nodes for the best move
         for move in legal_moves:
-            val = self.minVal(game.forecast_move(move), depth - 1, alpha, beta)
+            val = self.minVal(game.forecast_move(move), depth, alpha, beta)
 
             if val >= best_val:
                 best_val = val
@@ -484,16 +491,15 @@ class AlphaBetaPlayer(IsolationPlayer):
                 
             alpha = max(alpha, best_val)
         return best_move
-            
-        
-    
+
+
     def minVal(self, game, depth, alpha, beta):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
          
         legal_moves = game.get_legal_moves()
         
-        if len(legal_moves) == 0 or depth == 0:
+        if len(legal_moves) == 0 or depth == 1:
             return self.score(game, self)
         
         best_val = float("inf")
@@ -507,15 +513,13 @@ class AlphaBetaPlayer(IsolationPlayer):
         return best_val
          
     
-    
-    
     def maxVal(self, game, depth, alpha, beta):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         
         legal_moves = game.get_legal_moves()
         
-        if len(legal_moves) == 0 or depth == 0:
+        if len(legal_moves) == 0 or depth == 1:
             return self.score(game, self)
             
         best_val = float("-inf")
@@ -526,5 +530,4 @@ class AlphaBetaPlayer(IsolationPlayer):
                 return best_val
             alpha = max(alpha, best_val)
         return best_val
-            
-        
+

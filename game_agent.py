@@ -37,11 +37,18 @@ def custom_score(game, player):
     First it calculates a score of the board state based on the amount of moves available
     to the player vs two times the amount of available moves to the opponent, and if the player has
     more than twice as many moves as the opponent, the player will have a positive score/advantage.
+<<<<<<< Updated upstream
     The heuristic function then normalizes the difference in moves with the manhattan distance
     between each player using the manhattan distance method. If the manhattan distance between the
     player and the opponent is large, the player will find it difficult to block the opponent,
     therefore causing the board state to be penalized, else it will be rewarded. This is more of a 
     defensive strategy.
+=======
+    The heuristic function then normalizes the difference in moves via the manhattan distance
+    between each player. If the manhattan distance between the
+    player and the opponent is large, the player will find it difficult to block the opponent,
+    therefore causing the board state to be penalized, else it will be rewarded.
+>>>>>>> Stashed changes
     """
     
     if game.is_loser(player):
@@ -60,7 +67,11 @@ def custom_score(game, player):
     
     manhattan_distance = abs(own_position[0] - opp_position[0]) + abs(own_position[1] - opp_position[1])
     
+<<<<<<< Updated upstream
     return (float(move_difference / float(manhattan_distance)))
+=======
+    return float(move_difference / manhattan_distance)
+>>>>>>> Stashed changes
 
    
 def custom_score_2(game, player):
@@ -315,14 +326,22 @@ class MinimaxPlayer(IsolationPlayer):
         best_score = float("-inf")
         
         for move in legal_moves:
+<<<<<<< Updated upstream
             score = self.minValue(game.forecast_move(move), depth - 1)
+=======
+            score = self.min_value(game.forecast_move(move), depth - 1)
+>>>>>>> Stashed changes
             if score > best_score:
                 best_score, best_move = score, move
         
         return best_move
     
         
+<<<<<<< Updated upstream
     def maxValue(self, game, depth):
+=======
+    def max_value(self, game, depth):
+>>>>>>> Stashed changes
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
         
@@ -334,13 +353,21 @@ class MinimaxPlayer(IsolationPlayer):
         legal_moves = game.get_legal_moves()
         
         for move in legal_moves:
+<<<<<<< Updated upstream
             score = self.minValue(game.forecast_move(move), depth - 1)
+=======
+            score = self.min_value(game.forecast_move(move), depth - 1)
+>>>>>>> Stashed changes
             if score > best_score:
                 best_score = score
                 
         return best_score
     
+<<<<<<< Updated upstream
     def minValue(self, game, depth):
+=======
+    def min_value(self, game, depth):
+>>>>>>> Stashed changes
         
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
@@ -353,7 +380,11 @@ class MinimaxPlayer(IsolationPlayer):
         legal_moves = game.get_legal_moves()
         
         for move in legal_moves:
+<<<<<<< Updated upstream
             score = self.maxValue(game.forecast_move(move), depth - 1)
+=======
+            score = self.max_value(game.forecast_move(move), depth - 1)
+>>>>>>> Stashed changes
             if score <  best_score:
                 best_score = score
         
